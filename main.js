@@ -21,15 +21,15 @@ const drawLine = (ctx, fromX, fromY, toX, toY) => {
   ctx.stroke();
 };
 
-const createPointOnCircle = (angle, center, radius) => {
+const createPointOnCircle = (angle, radius) => {
   const radians = degreesToRadians(angle);
   return {
-    x: center.x + Math.cos(radians) * radius,
-    y: center.y + Math.sin(radians) * radius,
+    x: radius + Math.cos(radians) * radius,
+    y: radius + Math.sin(radians) * radius,
   };
 };
 
-const createPoints = (center, radius, max = 10, randomDistribution = false) => {
+const createPoints = (radius, max = 10, randomDistribution = false) => {
   const recurse = (memo, remaining) => {
     if (remaining === 0) {
       return memo;
@@ -40,7 +40,7 @@ const createPoints = (center, radius, max = 10, randomDistribution = false) => {
         ? random(0, 360)
         : remaining * (360 / max)
     );
-    const point = createPointOnCircle(angle, center, radius);
+    const point = createPointOnCircle(angle, radius);
 
     return recurse([...memo, point], remaining - 1);
   };
@@ -48,10 +48,10 @@ const createPoints = (center, radius, max = 10, randomDistribution = false) => {
   return recurse([], max);
 };
 
-const drawPauseIcon = (ctx, center, radius) => {
-  const x1 = center.x - (radius / 4) - (radius / 30);
-  const y1 = center.y - (radius / 5);
-  const x2 = center.x + (radius / 30);
+const drawPauseIcon = (ctx, radius) => {
+  const x1 = radius - (radius / 4) - (radius / 30);
+  const y1 = radius - (radius / 5);
+  const x2 = radius + (radius / 30);
   const w = radius / 4;
   const h = radius / 2.5;
   ctx.clearRect(x1, y1, w, h);
@@ -68,7 +68,6 @@ const createCanvas = (width) => {
   );
   const ctx = canvas.getContext('2d');
   const radius = width / 2;
-  const center = { x: radius, y: radius }; // Circumference center x, y
 
   ctx.font = `${width / 40}px monospace`;
   ctx.textBaseline = 'top';
@@ -80,13 +79,13 @@ const createCanvas = (width) => {
     }
 
     if (state.isPaused) {
-      drawPauseIcon(ctx, center, radius);
+      drawPauseIcon(ctx, radius);
       return window.requestAnimationFrame(() => update());
     }
 
     ctx.clearRect(0, 0, width, width);
 
-    const points = createPoints(center, radius, state.points, state.randomDistribution);
+    const points = createPoints(radius, state.points, state.randomDistribution);
     const n = points.length;
     const regions = (n / 24) * (Math.pow(n, 3) - (6 * Math.pow(n, 2)) + (23 * n) - 18) + 1;
 
@@ -94,7 +93,7 @@ const createCanvas = (width) => {
     ctx.fillText(`Points: ${n}`, 0, 0);
     ctx.fillText(`Regions: ${Math.round(regions)}`, 0, width / 29);
 
-    drawCircle(ctx, center.x, center.y, Math.floor(width / 2), 'transparent', true);
+    drawCircle(ctx, radius, radius, Math.floor(width / 2), 'transparent', true);
 
     points.forEach(({ x, y }) => {
       drawCircle(ctx, x, y, 5, 'white', true);
