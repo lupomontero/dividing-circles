@@ -80,7 +80,7 @@ const createCanvas = (width) => {
 
     if (state.isPaused) {
       drawPauseIcon(ctx, radius);
-      return window.requestAnimationFrame(() => update());
+      return window.requestAnimationFrame(update);
     }
 
     ctx.clearRect(0, 0, width, width);
@@ -93,16 +93,19 @@ const createCanvas = (width) => {
     ctx.fillText(`Points: ${n}`, 0, 0);
     ctx.fillText(`Regions: ${Math.round(regions)}`, 0, width / 29);
 
-    drawCircle(ctx, radius, radius, Math.floor(width / 2), 'transparent', true);
+    drawCircle(ctx, radius, radius, Math.floor(radius), 'transparent', true);
 
     points.forEach(({ x, y }) => {
-      drawCircle(ctx, x, y, 5, 'white', true);
+      drawCircle(ctx, x, y, 3, 'white', true);
       points.forEach(({ x: x2, y: y2 }) => {
+        if (x === x2 && y === y2) {
+          return;
+        }
         drawLine(ctx, x, y, x2, y2);
       });
     });
 
-    window.requestAnimationFrame(() => update());
+    window.requestAnimationFrame(update);
   };
 
   update();
